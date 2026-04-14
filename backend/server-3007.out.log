@@ -1,0 +1,21 @@
+{"level":30,"time":1776118683477,"pid":24524,"hostname":"DESKTOP-H3AD2OP","msg":"Server listening at http://127.0.0.1:3007"}
+API running on port 3007
+{"level":30,"time":1776118683478,"pid":24524,"hostname":"DESKTOP-H3AD2OP","msg":"Server listening at http://192.168.18.191:3007"}
+{"level":30,"time":1776118736955,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-1","req":{"method":"POST","url":"/auth/dev-login","host":"127.0.0.1:3007","remoteAddress":"127.0.0.1","remotePort":61917},"msg":"incoming request"}
+{"level":30,"time":1776118737815,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-1","res":{"statusCode":200},"responseTime":859.8256998062134,"msg":"request completed"}
+{"level":30,"time":1776118737869,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-2","req":{"method":"POST","url":"/consultations","host":"127.0.0.1:3007","remoteAddress":"127.0.0.1","remotePort":61917},"msg":"incoming request"}
+{"level":30,"time":1776118740988,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-2","res":{"statusCode":200},"responseTime":3119.106499671936,"msg":"request completed"}
+{"level":30,"time":1776118740991,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-3","req":{"method":"POST","url":"/consultations","host":"127.0.0.1:3007","remoteAddress":"127.0.0.1","remotePort":61917},"msg":"incoming request"}
+{"level":30,"time":1776118743667,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-3","res":{"statusCode":200},"responseTime":2675.3983993530273,"msg":"request completed"}
+{"level":30,"time":1776118743671,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-4","req":{"method":"GET","url":"/consultations/b42827ab-bb15-4754-bf44-62014e5e50af/public-status","host":"127.0.0.1:3007","remoteAddress":"127.0.0.1","remotePort":61917},"msg":"incoming request"}
+{"level":30,"time":1776118744278,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-4","res":{"statusCode":200},"responseTime":606.535400390625,"msg":"request completed"}
+{"level":30,"time":1776118744279,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-5","req":{"method":"GET","url":"/consultations/1004accf-fdff-4f69-a25f-d218137eca66/public-status","host":"127.0.0.1:3007","remoteAddress":"127.0.0.1","remotePort":61917},"msg":"incoming request"}
+{"level":30,"time":1776118744970,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-5","res":{"statusCode":200},"responseTime":690.996000289917,"msg":"request completed"}
+{"level":30,"time":1776118744971,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-6","req":{"method":"POST","url":"/payments/bfdcfcfc-1239-47a0-9a49-0e5c0164e807/dev-approve","host":"127.0.0.1:3007","remoteAddress":"127.0.0.1","remotePort":61917},"msg":"incoming request"}
+{"level":30,"time":1776118746628,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-6","res":{"statusCode":200},"responseTime":1657.146499633789,"msg":"request completed"}
+{"level":30,"time":1776118746629,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-7","req":{"method":"POST","url":"/payments/5d1afd6e-3af0-445b-82b7-5b467eead01b/dev-approve","host":"127.0.0.1:3007","remoteAddress":"127.0.0.1","remotePort":61917},"msg":"incoming request"}
+{"level":30,"time":1776118748165,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-7","res":{"statusCode":200},"responseTime":1536.255599975586,"msg":"request completed"}
+{"level":30,"time":1776118748166,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-8","req":{"method":"GET","url":"/consultations/b42827ab-bb15-4754-bf44-62014e5e50af/public-status","host":"127.0.0.1:3007","remoteAddress":"127.0.0.1","remotePort":61917},"msg":"incoming request"}
+{"level":30,"time":1776118749071,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-8","res":{"statusCode":200},"responseTime":904.1585998535156,"msg":"request completed"}
+{"level":30,"time":1776118749071,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-9","req":{"method":"GET","url":"/consultations/1004accf-fdff-4f69-a25f-d218137eca66/public-status","host":"127.0.0.1:3007","remoteAddress":"127.0.0.1","remotePort":61917},"msg":"incoming request"}
+{"level":30,"time":1776118749671,"pid":24524,"hostname":"DESKTOP-H3AD2OP","reqId":"req-9","res":{"statusCode":200},"responseTime":599.4737005233765,"msg":"request completed"}

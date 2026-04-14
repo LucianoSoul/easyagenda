@@ -1,0 +1,31 @@
+{"level":30,"time":1776117774033,"pid":24728,"hostname":"DESKTOP-H3AD2OP","msg":"Server listening at http://127.0.0.1:3006"}
+API running on port 3006
+{"level":30,"time":1776117774033,"pid":24728,"hostname":"DESKTOP-H3AD2OP","msg":"Server listening at http://192.168.18.191:3006"}
+{"level":30,"time":1776117803491,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-1","req":{"method":"POST","url":"/auth/dev-login","host":"127.0.0.1:3006","remoteAddress":"127.0.0.1","remotePort":61845},"msg":"incoming request"}
+{"level":30,"time":1776117804250,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-1","res":{"statusCode":200},"responseTime":758.2980995178223,"msg":"request completed"}
+{"level":30,"time":1776117804295,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-2","req":{"method":"GET","url":"/integrations/google/status","host":"127.0.0.1:3006","remoteAddress":"127.0.0.1","remotePort":61845},"msg":"incoming request"}
+{"level":30,"time":1776117805158,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-2","res":{"statusCode":200},"responseTime":862.1832008361816,"msg":"request completed"}
+{"level":30,"time":1776117805159,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-3","req":{"method":"GET","url":"/settings","host":"127.0.0.1:3006","remoteAddress":"127.0.0.1","remotePort":61845},"msg":"incoming request"}
+{"level":30,"time":1776117805743,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-3","res":{"statusCode":200},"responseTime":583.4433002471924,"msg":"request completed"}
+{"level":30,"time":1776117860488,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-4","req":{"method":"POST","url":"/auth/dev-login","host":"127.0.0.1:3006","remoteAddress":"127.0.0.1","remotePort":61856},"msg":"incoming request"}
+{"level":30,"time":1776117860804,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-4","res":{"statusCode":200},"responseTime":315.60640048980713,"msg":"request completed"}
+{"level":30,"time":1776117860818,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-5","req":{"method":"POST","url":"/appointments","host":"127.0.0.1:3006","remoteAddress":"127.0.0.1","remotePort":61856},"msg":"incoming request"}
+{"level":30,"time":1776117861827,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-5","res":{"statusCode":400},"responseTime":1009.4945001602173,"msg":"request completed"}
+{"level":30,"time":1776117861838,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-6","req":{"method":"POST","url":"/appointments","host":"127.0.0.1:3006","remoteAddress":"127.0.0.1","remotePort":61856},"msg":"incoming request"}
+{"level":30,"time":1776117862812,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-6","res":{"statusCode":400},"responseTime":973.4130001068115,"msg":"request completed"}
+{"level":30,"time":1776117862815,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-7","req":{"method":"POST","url":"/appointments","host":"127.0.0.1:3006","remoteAddress":"127.0.0.1","remotePort":61856},"msg":"incoming request"}
+{"level":30,"time":1776117864832,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-7","res":{"statusCode":200},"responseTime":2016.8050003051758,"msg":"request completed"}
+{"level":30,"time":1776117864834,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-8","req":{"method":"POST","url":"/appointments","host":"127.0.0.1:3006","remoteAddress":"127.0.0.1","remotePort":61856},"msg":"incoming request"}
+{"level":30,"time":1776117866873,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-8","res":{"statusCode":200},"responseTime":2039.2486000061035,"msg":"request completed"}
+{"level":30,"time":1776117866879,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-9","req":{"method":"GET","url":"/appointments/96712c65-642b-4043-84d2-245e107db80b","host":"127.0.0.1:3006","remoteAddress":"127.0.0.1","remotePort":61856},"msg":"incoming request"}
+{"level":30,"time":1776117867635,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-9","res":{"statusCode":200},"responseTime":755.3163995742798,"msg":"request completed"}
+{"level":30,"time":1776117867636,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-a","req":{"method":"GET","url":"/appointments/de164b38-8781-4315-a940-389db817cdab","host":"127.0.0.1:3006","remoteAddress":"127.0.0.1","remotePort":61856},"msg":"incoming request"}
+{"level":30,"time":1776117868434,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-a","res":{"statusCode":200},"responseTime":798.3599996566772,"msg":"request completed"}
+{"level":30,"time":1776117868436,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-b","req":{"method":"POST","url":"/appointments/96712c65-642b-4043-84d2-245e107db80b/google-sync","host":"127.0.0.1:3006","remoteAddress":"127.0.0.1","remotePort":61856},"msg":"incoming request"}
+{"level":30,"time":1776117868995,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-b","res":{"statusCode":400},"responseTime":559.3551998138428,"msg":"request completed"}
+{"level":30,"time":1776117868998,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-c","req":{"method":"POST","url":"/appointments/de164b38-8781-4315-a940-389db817cdab/google-sync","host":"127.0.0.1:3006","remoteAddress":"127.0.0.1","remotePort":61856},"msg":"incoming request"}
+{"level":30,"time":1776117869565,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-c","res":{"statusCode":400},"responseTime":566.8838996887207,"msg":"request completed"}
+{"level":30,"time":1776117869567,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-d","req":{"method":"POST","url":"/payments/0bb9cde3-75fa-4c9c-8f9a-7def183db1b0/dev-approve","host":"127.0.0.1:3006","remoteAddress":"127.0.0.1","remotePort":61856},"msg":"incoming request"}
+{"level":30,"time":1776117871068,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-d","res":{"statusCode":200},"responseTime":1500.7323999404907,"msg":"request completed"}
+{"level":30,"time":1776117871069,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-e","req":{"method":"POST","url":"/payments/4dbf7ace-be36-4753-862a-f9897b06bea3/dev-approve","host":"127.0.0.1:3006","remoteAddress":"127.0.0.1","remotePort":61856},"msg":"incoming request"}
+{"level":30,"time":1776117872513,"pid":24728,"hostname":"DESKTOP-H3AD2OP","reqId":"req-e","res":{"statusCode":200},"responseTime":1443.619400024414,"msg":"request completed"}

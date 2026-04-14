@@ -1,0 +1,40 @@
+export type RefundDecision = {
+  id: string;
+  appointment_id: string;
+  payment_id: string | null;
+  account_id: string;
+  policy_type: string;
+  event_type: string;
+  refund_percent: number;
+  credit_percent: number;
+  refund_amount: number;
+  credit_amount: number;
+  decision_status: string;
+  decision_reason: string | null;
+  created_at: string;
+  cancelled_at: string | null;
+  hours_before_start: number | null;
+  execution_status: string;
+  processed_at: string | null;
+  resolved_at: string | null;
+  gateway_refund_id: string | null;
+  gateway_response: Record<string, unknown> | null;
+  applied_by: string | null;
+  error_message: string | null;
+};
+
+export type CreditRecord = {
+  id: string;
+  account_id: string;
+  client_id: string;
+  appointment_id: string | null;
+  source_decision_id: string | null;
+  amount: number;
+  status: string;
+  description: string | null;
+  expires_at: string | null;
+  consumed_at: string | null;
+  created_at: string;
+  remaining_amount: number;
+  consumed_by_appointment_id: string | null;
+};
