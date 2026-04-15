@@ -6,7 +6,7 @@ type OverflowAction = {
 
 export function OverflowMenu({
   actions,
-  label = "Ações"
+  label = "Acoes"
 }: {
   actions: OverflowAction[];
   label?: string;
@@ -14,7 +14,7 @@ export function OverflowMenu({
   return (
     <details className="overflow-menu">
       <summary aria-label={label} className="overflow-menu__trigger">
-        ⋮
+        {"\u22EE"}
       </summary>
 
       <div className="overflow-menu__panel">

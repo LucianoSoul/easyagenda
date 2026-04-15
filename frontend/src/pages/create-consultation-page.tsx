@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../auth/auth";
 import { LoadingBlock } from "../components/loading-block";
 import { SharePanel } from "../components/share-panel";
+import { ServiceSummary } from "../components/service-summary";
 import {
   StatusBadge,
   appointmentStatusTone,
@@ -21,7 +22,6 @@ import {
   fromIsoToLocalDateTime,
   toIsoFromLocalDateTime
 } from "../utils/format";
-import { formatServiceSummary } from "../utils/presentation";
 
 export function CreateConsultationPage() {
   const { token } = useAuth();
@@ -186,14 +186,20 @@ export function CreateConsultationPage() {
             <select value={serviceId} onChange={(event) => setServiceId(event.target.value)}>
               {services.map((service) => (
                 <option key={service.id} value={service.id}>
-                  {service.name} • {formatServiceSummary(service)}
+                  {service.name}
                 </option>
               ))}
             </select>
           </label>
 
           {selectedService ? (
-            <div className="info-strip">{formatServiceSummary(selectedService)}</div>
+            <div className="info-strip">
+              <ServiceSummary
+                attendanceMode={selectedService.attendance_mode}
+                durationMinutes={selectedService.duration_minutes}
+                price={selectedService.price}
+              />
+            </div>
           ) : null}
 
           <div className="form-row">
