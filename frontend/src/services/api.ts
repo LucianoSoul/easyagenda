@@ -13,8 +13,7 @@ import type {
   PaymentRecord,
   RefundDecision
 } from "../types/api";
-
-const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:3006";
+import { apiBaseUrl } from "../config/runtime";
 
 export class ApiError extends Error {
   status: number;

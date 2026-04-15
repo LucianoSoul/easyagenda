@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../auth/auth";
+import { buildPublicConsultationUrl } from "../config/runtime";
 import { LoadingBlock } from "../components/loading-block";
 import {
   StatusBadge,
@@ -18,6 +19,7 @@ import type {
   PaymentRecord
 } from "../types/api";
 import { copyToClipboard, formatCurrency, formatDateTime, toLocalDateInput } from "../utils/format";
+import { getBooleanLabel, getLabelForValue } from "../utils/ui-labels";
 
 type DetailState = {
   appointment: AppointmentDetail;
@@ -27,10 +29,6 @@ type DetailState = {
   agendaItem: AgendaItem | null;
   googleStatus: GoogleIntegrationStatus;
 };
-
-function buildPublicConsultationPath(appointmentId: string) {
-  return `/public/consultations/${appointmentId}`;
-}
 
 export function ConsultationDetailPage() {
   const { id } = useParams();
@@ -89,9 +87,7 @@ export function ConsultationDetailPage() {
   const detail = state;
 
   async function handleCopyPublicUrl() {
-    const base = import.meta.env.VITE_PUBLIC_APP_BASE_URL;
-    const relative = buildPublicConsultationPath(consultationId);
-    const value = base ? new URL(relative, base).toString() : relative;
+    const value = buildPublicConsultationUrl(consultationId);
     await copyToClipboard(value);
     setFeedback("Link público copiado.");
     window.setTimeout(() => setFeedback(null), 2000);
@@ -107,7 +103,7 @@ export function ConsultationDetailPage() {
     if (!whatsappText) return;
 
     await copyToClipboard(whatsappText);
-    setFeedback("Mensagem de WhatsApp copiada.");
+    setFeedback("Mensagem copiada.");
     window.setTimeout(() => setFeedback(null), 2000);
   }
 
@@ -116,7 +112,7 @@ export function ConsultationDetailPage() {
 
     try {
       await api.syncGoogle(token, consultationId);
-      setFeedback("Sincronização Google solicitada.");
+      setFeedback("Sincronização solicitada.");
     } catch (requestError) {
       setFeedback(requestError instanceof Error ? requestError.message : "Falha ao sincronizar.");
     }
@@ -125,7 +121,7 @@ export function ConsultationDetailPage() {
   async function handleCancel() {
     if (!token) return;
 
-    if (!window.confirm("Cancelar esta consulta?")) {
+    if (!window.confirm("Deseja cancelar esta consulta?")) {
       return;
     }
 
@@ -138,25 +134,29 @@ export function ConsultationDetailPage() {
   }
 
   return (
-    <div className="stack-lg">
-      <div className="page-hero">
-        <div>
+    <div className="stack-xl">
+      <section className="page-hero">
+        <div className="stack-sm">
+          <div className="eyebrow">Detalhe operacional</div>
           <h1>Detalhe da consulta</h1>
-          <p>Resumo operacional com pagamento, entrega, comunicação e ações rápidas.</p>
+          <p>
+            Acompanhamento completo de pagamento, comunicação, modalidade e ações críticas do
+            atendimento.
+          </p>
         </div>
         <Link className="button button--secondary" to="/consultations">
           Voltar para consultas
         </Link>
-      </div>
+      </section>
 
       {feedback ? <div className="alert">{feedback}</div> : null}
 
       <div className="detail-grid">
         <div className="stack-md">
-          <section className="card stack-md">
+          <section className="card card--highlight stack-md">
             <div className="section-heading">
               <div>
-                <h2>Resumo</h2>
+                <h2>Resumo da consulta</h2>
                 <p>
                   {state.publicStatus.serviceName ?? "Consulta"} com{" "}
                   {state.publicStatus.providerName ?? "profissional"}
@@ -166,14 +166,17 @@ export function ConsultationDetailPage() {
                 <StatusBadge
                   label={state.publicStatus.appointmentStatus}
                   tone={appointmentStatusTone(state.publicStatus.appointmentStatus)}
+                  variant="appointment-status"
                 />
                 <StatusBadge
-                  label={state.publicStatus.paymentStatus ?? "sem pagamento"}
+                  label={state.publicStatus.paymentStatus ?? "pending"}
                   tone={paymentStatusTone(state.publicStatus.paymentStatus)}
+                  variant="payment-status"
                 />
                 <StatusBadge
-                  label={state.publicStatus.deliveryMode ?? "sem modo"}
+                  label={state.publicStatus.deliveryMode ?? "nao informado"}
                   tone={deliveryModeTone(state.publicStatus.deliveryMode)}
+                  variant="delivery-mode"
                 />
               </div>
             </div>
@@ -188,18 +191,20 @@ export function ConsultationDetailPage() {
                 <strong>{formatDateTime(state.publicStatus.endTime)}</strong>
               </div>
               <div>
-                <span className="summary-label">Modo</span>
-                <strong>{state.appointment.delivery_mode ?? "Nao informado"}</strong>
+                <span className="summary-label">Modalidade</span>
+                <strong>{getLabelForValue(state.appointment.delivery_mode, "delivery-mode")}</strong>
               </div>
               <div>
                 <span className="summary-label">Modelo do serviço</span>
-                <strong>{state.appointment.service_attendance_mode ?? "Nao informado"}</strong>
+                <strong>
+                  {getLabelForValue(state.appointment.service_attendance_mode, "attendance-mode")}
+                </strong>
               </div>
             </div>
 
             {state.appointment.notes ? (
               <div className="note-box">
-                <span className="summary-label">Notas</span>
+                <span className="summary-label">Observações</span>
                 <p>{state.appointment.notes}</p>
               </div>
             ) : null}
@@ -209,7 +214,7 @@ export function ConsultationDetailPage() {
             <div className="section-heading">
               <div>
                 <h2>Pagamento</h2>
-                <p>Status financeiro e dados usados no fluxo público da consulta.</p>
+                <p>Estado financeiro e dados refletidos no acompanhamento público da consulta.</p>
               </div>
             </div>
 
@@ -220,17 +225,22 @@ export function ConsultationDetailPage() {
               </div>
               <div>
                 <span className="summary-label">Método</span>
-                <strong>{state.publicStatus.payment?.method ?? "Aguardando"}</strong>
+                <strong>
+                  {getLabelForValue(state.publicStatus.payment?.method, "payment-method")}
+                </strong>
               </div>
               <div>
                 <span className="summary-label">Gateway</span>
-                <strong>{state.publicStatus.payment?.gateway ?? "Nao informado"}</strong>
+                <strong>
+                  {getLabelForValue(state.publicStatus.payment?.gateway, "payment-gateway")}
+                </strong>
               </div>
               <div>
-                <span className="summary-label">Status</span>
+                <span className="summary-label">Situação</span>
                 <StatusBadge
-                  label={state.publicStatus.paymentStatus ?? "sem pagamento"}
+                  label={state.publicStatus.paymentStatus ?? "pending"}
                   tone={paymentStatusTone(state.publicStatus.paymentStatus)}
+                  variant="payment-status"
                 />
               </div>
             </div>
@@ -250,8 +260,15 @@ export function ConsultationDetailPage() {
           <section className="card stack-md">
             <div className="section-heading">
               <div>
-                <h2>{state.publicStatus.deliveryMode === "online" ? "Entrega online" : "Atendimento presencial"}</h2>
-                <p>Contexto de reunião, Google e check-in, mostrado conforme o modo da consulta.</p>
+                <h2>
+                  {state.publicStatus.deliveryMode === "online"
+                    ? "Atendimento online"
+                    : "Atendimento presencial"}
+                </h2>
+                <p>
+                  Contexto da execução da consulta com foco em reunião, check-in e visibilidade do
+                  fluxo real.
+                </p>
               </div>
             </div>
 
@@ -259,16 +276,16 @@ export function ConsultationDetailPage() {
               <>
                 <div className="summary-grid">
                   <div>
-                    <span className="summary-label">Google conectado</span>
+                    <span className="summary-label">Integração com Google</span>
                     <StatusBadge
                       label={state.googleStatus.connected ? "conectado" : "desconectado"}
                       tone={state.googleStatus.connected ? "success" : "warning"}
                     />
                   </div>
                   <div>
-                    <span className="summary-label">Meet disponível</span>
+                    <span className="summary-label">Reunião disponível</span>
                     <StatusBadge
-                      label={state.publicStatus.meeting ? "sim" : "não"}
+                      label={getBooleanLabel(Boolean(state.publicStatus.meeting))}
                       tone={state.publicStatus.meeting ? "success" : "neutral"}
                     />
                   </div>
@@ -278,7 +295,11 @@ export function ConsultationDetailPage() {
                   <div className="meeting-box">
                     <span className="summary-label">Link da reunião</span>
                     <a
-                      href={state.publicStatus.meeting.meetLink ?? state.publicStatus.meeting.htmlLink ?? "#"}
+                      href={
+                        state.publicStatus.meeting.meetLink ??
+                        state.publicStatus.meeting.htmlLink ??
+                        "#"
+                      }
                       rel="noreferrer"
                       target="_blank"
                     >
@@ -287,7 +308,7 @@ export function ConsultationDetailPage() {
                   </div>
                 ) : (
                   <div className="empty-state">
-                    O link da reunião ainda não está disponível ou aguarda pagamento/aprovação da sincronização.
+                    A reunião ainda não foi liberada ou depende de pagamento e sincronização.
                   </div>
                 )}
               </>
@@ -295,11 +316,18 @@ export function ConsultationDetailPage() {
               <div className="summary-grid">
                 <div>
                   <span className="summary-label">Check-in</span>
-                  <strong>{state.agendaItem?.attendance?.status ?? "Sem check-in registrado"}</strong>
+                  <strong>
+                    {getLabelForValue(state.agendaItem?.attendance?.status, "attendance-status")}
+                  </strong>
                 </div>
                 <div>
                   <span className="summary-label">Token</span>
-                  <strong>{state.agendaItem?.checkinToken?.used ? "utilizado" : "disponível"}</strong>
+                  <strong>
+                    {getBooleanLabel(Boolean(state.agendaItem?.checkinToken?.used), {
+                      trueLabel: "Utilizado",
+                      falseLabel: "Disponível"
+                    })}
+                  </strong>
                 </div>
                 <div>
                   <span className="summary-label">Expira em</span>
@@ -311,7 +339,9 @@ export function ConsultationDetailPage() {
                 </div>
                 <div>
                   <span className="summary-label">Método</span>
-                  <strong>{state.agendaItem?.attendance?.checkin_method ?? "Não registrado"}</strong>
+                  <strong>
+                    {getLabelForValue(state.agendaItem?.attendance?.checkin_method, "checkin-method")}
+                  </strong>
                 </div>
               </div>
             )}
@@ -323,7 +353,7 @@ export function ConsultationDetailPage() {
             <div className="section-heading">
               <div>
                 <h2>Comunicações</h2>
-                <p>Payloads disponíveis para envio por email, WhatsApp e push.</p>
+                <p>Mensagens prontas para e-mail, WhatsApp e envio direto.</p>
               </div>
             </div>
 
@@ -333,15 +363,18 @@ export function ConsultationDetailPage() {
               communicationCards.map((payload) => (
                 <article className="communication-card" key={payload.key}>
                   <div className="communication-card__header">
-                    <strong>{payload.key}</strong>
+                    <strong>{getLabelForValue(payload.key, "communication")}</strong>
                     <StatusBadge
-                      label={payload.meetingIncluded ? "com link" : "sem link"}
+                      label={getBooleanLabel(payload.meetingIncluded, {
+                        trueLabel: "Com acesso",
+                        falseLabel: "Sem acesso"
+                      })}
                       tone={payload.meetingIncluded ? "info" : "neutral"}
                     />
                   </div>
                   <div className="stack-sm">
                     <div>
-                      <span className="summary-label">Email</span>
+                      <span className="summary-label">E-mail</span>
                       <p>{payload.email.subject}</p>
                     </div>
                     <div>
@@ -349,7 +382,7 @@ export function ConsultationDetailPage() {
                       <p>{payload.whatsapp.text}</p>
                     </div>
                     <div>
-                      <span className="summary-label">Push</span>
+                      <span className="summary-label">Notificação</span>
                       <p>
                         {payload.push.title}: {payload.push.body}
                       </p>
@@ -363,8 +396,8 @@ export function ConsultationDetailPage() {
           <section className="card stack-md">
             <div className="section-heading">
               <div>
-                <h2>Ações</h2>
-                <p>Atalhos úteis para compartilhar, sincronizar e ajustar a consulta.</p>
+                <h2>Ações rápidas</h2>
+                <p>Atalhos para compartilhar, sincronizar e ajustar o atendimento.</p>
               </div>
             </div>
 
@@ -372,13 +405,21 @@ export function ConsultationDetailPage() {
               <button className="button button--block" onClick={handleCopyPublicUrl} type="button">
                 Copiar link público
               </button>
-              <button className="button button--secondary button--block" onClick={handleCopyWhatsApp} type="button">
-                Copiar WhatsApp
+              <button
+                className="button button--secondary button--block"
+                onClick={handleCopyWhatsApp}
+                type="button"
+              >
+                Copiar mensagem
               </button>
               <button className="button button--ghost button--block" onClick={handleGoogleSync} type="button">
-                Sincronizar Google
+                Sincronizar agenda
               </button>
-              <button className="button button--ghost button--block" onClick={handleCancel} type="button">
+              <button
+                className="button button--ghost button--danger button--block"
+                onClick={handleCancel}
+                type="button"
+              >
                 Cancelar consulta
               </button>
             </div>

@@ -21,6 +21,7 @@ import {
   fromIsoToLocalDateTime,
   toIsoFromLocalDateTime
 } from "../utils/format";
+import { formatServiceSummary } from "../utils/presentation";
 
 export function CreateConsultationPage() {
   const { token } = useAuth();
@@ -105,7 +106,7 @@ export function CreateConsultationPage() {
     return error ? (
       <div className="alert alert--error">{error}</div>
     ) : (
-      <LoadingBlock label="Preparando formulário..." />
+      <LoadingBlock label="Preparando formulario..." />
     );
   }
 
@@ -144,24 +145,28 @@ export function CreateConsultationPage() {
 
   const ruleText =
     deliveryMode === "online"
-      ? "O link da reunião será liberado automaticamente após a aprovação do pagamento."
-      : "O comparecimento presencial será confirmado após a aprovação do pagamento.";
+      ? "O acesso da reunião é liberado automaticamente após a aprovação do pagamento."
+      : "O atendimento presencial fica confirmado após a aprovação do pagamento.";
 
   return (
-    <div className="stack-lg">
-      <div className="page-hero">
-        <div>
+    <div className="stack-xl">
+      <section className="page-hero">
+        <div className="stack-sm">
+          <div className="eyebrow">Novo atendimento</div>
           <h1>Criar consulta</h1>
-          <p>O fluxo mais valioso do produto: criar, cobrar e compartilhar uma consulta paga.</p>
+          <p>
+            Cadastre um novo compromisso com clareza visual, cobrança definida e material de
+            compartilhamento pronto para uso.
+          </p>
         </div>
-      </div>
+      </section>
 
       <div className="content-grid">
-        <form className="card stack-md" onSubmit={handleSubmit}>
+        <form className="card card--highlight stack-md" onSubmit={handleSubmit}>
           <div className="section-heading">
             <div>
-              <h2>Dados da consulta</h2>
-              <p>Preencha o mínimo necessário e deixe o backend cuidar do fluxo pago.</p>
+              <h2>Dados principais</h2>
+              <p>O formulário foi mantido objetivo para facilitar o uso no dia a dia da clínica.</p>
             </div>
           </div>
 
@@ -181,18 +186,14 @@ export function CreateConsultationPage() {
             <select value={serviceId} onChange={(event) => setServiceId(event.target.value)}>
               {services.map((service) => (
                 <option key={service.id} value={service.id}>
-                  {service.name} - {formatCurrency(service.price)}
+                  {service.name} • {formatServiceSummary(service)}
                 </option>
               ))}
             </select>
           </label>
 
           {selectedService ? (
-            <div className="info-strip">
-              <span>{selectedService.duration_minutes} min</span>
-              <span>{selectedService.attendance_mode}</span>
-              <span>{formatCurrency(selectedService.price)}</span>
-            </div>
+            <div className="info-strip">{formatServiceSummary(selectedService)}</div>
           ) : null}
 
           <div className="form-row">
@@ -216,7 +217,7 @@ export function CreateConsultationPage() {
           </div>
 
           <label className="field">
-            <span>Modo de atendimento</span>
+            <span>Modalidade</span>
             <select
               disabled={deliveryModeLocked}
               value={deliveryMode}
@@ -228,12 +229,12 @@ export function CreateConsultationPage() {
           </label>
 
           <label className="field">
-            <span>Notas</span>
+            <span>Observações</span>
             <textarea
               rows={5}
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
-              placeholder="Observações relevantes para a consulta"
+              placeholder="Registre orientações, contexto clínico ou detalhes importantes"
             />
           </label>
 
@@ -248,8 +249,8 @@ export function CreateConsultationPage() {
           <section className="card stack-md">
             <div className="section-heading">
               <div>
-                <h2>Prévia</h2>
-                <p>O que o profissional vê antes de criar e o que será compartilhado depois.</p>
+                <h2>Prévia operacional</h2>
+                <p>Antecipe como o atendimento ficará registrado antes da confirmação final.</p>
               </div>
             </div>
 
@@ -271,17 +272,21 @@ export function CreateConsultationPage() {
                 <strong>{endTime ? formatDateTime(new Date(endTime).toISOString()) : "--"}</strong>
               </div>
               <div>
-                <span className="summary-label">Modo</span>
-                <StatusBadge label={deliveryMode} tone={deliveryModeTone(deliveryMode)} />
+                <span className="summary-label">Modalidade</span>
+                <StatusBadge
+                  label={deliveryMode}
+                  tone={deliveryModeTone(deliveryMode)}
+                  variant="delivery-mode"
+                />
               </div>
               <div>
-                <span className="summary-label">Pagamento estimado</span>
+                <span className="summary-label">Valor estimado</span>
                 <strong>{formatCurrency(selectedService?.price)}</strong>
               </div>
             </div>
 
             <div className="note-box">
-              <span className="summary-label">Regra de liberação</span>
+              <span className="summary-label">Regra do fluxo</span>
               <p>{ruleText}</p>
             </div>
           </section>
@@ -292,16 +297,16 @@ export function CreateConsultationPage() {
                 <div className="section-heading">
                   <div>
                     <h2>Consulta criada com sucesso</h2>
-                    <p>Resumo final do agendamento e do pagamento gerado.</p>
+                    <p>O atendimento já saiu com pagamento associado e link público pronto.</p>
                   </div>
                   <Link className="text-link" to={`/consultations/${result.appointment.id}`}>
-                    Ver detalhe
+                    Abrir detalhes
                   </Link>
                 </div>
 
                 <div className="summary-grid">
                   <div>
-                    <span className="summary-label">Consulta</span>
+                    <span className="summary-label">Identificador</span>
                     <strong>{result.appointment.id}</strong>
                   </div>
                   <div>
@@ -309,10 +314,11 @@ export function CreateConsultationPage() {
                     <strong>{formatDateTime(result.appointment.start_time)}</strong>
                   </div>
                   <div>
-                    <span className="summary-label">Agendamento</span>
+                    <span className="summary-label">Situação</span>
                     <StatusBadge
                       label={result.appointment.status}
                       tone={appointmentStatusTone(result.appointment.status)}
+                      variant="appointment-status"
                     />
                   </div>
                   <div>
@@ -320,13 +326,15 @@ export function CreateConsultationPage() {
                     <StatusBadge
                       label={result.payment.status}
                       tone={paymentStatusTone(result.payment.status)}
+                      variant="payment-status"
                     />
                   </div>
                   <div>
-                    <span className="summary-label">Modo</span>
+                    <span className="summary-label">Modalidade</span>
                     <StatusBadge
-                      label={result.appointment.delivery_mode ?? "sem modo"}
+                      label={result.appointment.delivery_mode ?? "nao informado"}
                       tone={deliveryModeTone(result.appointment.delivery_mode)}
+                      variant="delivery-mode"
                     />
                   </div>
                   <div>
@@ -344,7 +352,8 @@ export function CreateConsultationPage() {
             </>
           ) : (
             <section className="card empty-state">
-              Após criar a consulta, o resumo final e o payload de compartilhamento aparecem aqui.
+              Assim que a consulta for criada, o resumo final e os conteúdos de envio aparecerão
+              aqui.
             </section>
           )}
         </div>

@@ -7,6 +7,14 @@ export function formatDateTime(value: string | null | undefined) {
   }).format(new Date(value));
 }
 
+export function formatDate(value: string | null | undefined) {
+  if (!value) return "Nao informado";
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "medium"
+  }).format(new Date(value));
+}
+
 export function formatTime(value: string | null | undefined) {
   if (!value) return "--:--";
 
@@ -21,6 +29,16 @@ export function formatCurrency(value: number | null | undefined) {
     style: "currency",
     currency: "BRL"
   }).format(value ?? 0);
+}
+
+export function formatLongDate(value: string | null | undefined) {
+  if (!value) return "Nao informado";
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long"
+  }).format(new Date(value));
 }
 
 export function toLocalDateInput(date: Date) {

@@ -7,16 +7,17 @@ export function PlaceholderPage({
 }) {
   return (
     <div className="stack-lg">
-      <div className="page-hero">
-        <div>
+      <section className="page-hero">
+        <div className="stack-sm">
+          <div className="eyebrow">Módulo em evolução</div>
           <h1>{title}</h1>
           <p>{description}</p>
         </div>
-      </div>
+      </section>
 
       <section className="card empty-state">
-        Esta área fica visível na navegação para sustentar a arquitetura do produto, mas ainda
-        não entrou no escopo funcional deste MVP beta.
+        Esta área permanece visível para sustentar a arquitetura do produto e a navegação da
+        plataforma. O fluxo funcional completo será incorporado em uma próxima etapa.
       </section>
     </div>
   );

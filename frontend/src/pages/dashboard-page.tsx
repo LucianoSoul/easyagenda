@@ -16,7 +16,7 @@ import type {
   PaymentRecord,
   RefundDecision
 } from "../types/api";
-import { formatCurrency, formatDateTime, formatTime, toLocalDateInput } from "../utils/format";
+import { formatCurrency, formatDateTime, formatLongDate, formatTime, toLocalDateInput } from "../utils/format";
 
 type DashboardState = {
   todayItems: AgendaItem[];
@@ -31,6 +31,15 @@ function getGreeting() {
   if (hour < 12) return "Bom dia";
   if (hour < 18) return "Boa tarde";
   return "Boa noite";
+}
+
+function getFirstName(email: string | null | undefined) {
+  if (!email) return "profissional";
+
+  return email
+    .split("@")[0]
+    .split(/[._-]+/)[0]
+    .replace(/^./, (value) => value.toUpperCase());
 }
 
 export function DashboardPage() {
@@ -62,7 +71,7 @@ export function DashboardPage() {
         setError(
           requestError instanceof Error
             ? requestError.message
-            : "Nao foi possivel carregar o dashboard."
+            : "Nao foi possivel carregar a visao geral."
         );
       });
   }, [token]);
@@ -77,12 +86,12 @@ export function DashboardPage() {
         (item) =>
           Date.parse(item.appointment.start_time) >= now && item.appointment.status !== "cancelled"
       )
-      .slice(0, 5);
+      .slice(0, 4);
   }, [state]);
 
   if (!token) return null;
   if (error) return <div className="alert alert--error">{error}</div>;
-  if (!state) return <LoadingBlock label="Carregando operação do dia..." />;
+  if (!state) return <LoadingBlock label="Carregando visao da operacao..." />;
 
   const todayLabel = new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "full"
@@ -105,50 +114,95 @@ export function DashboardPage() {
     !state.googleStatus.connected
       ? state.upcomingItems.filter((item) => item.appointment.delivery_mode === "online").length
       : 0;
-  const firstName = session?.user.email?.split("@")[0].split(".")[0] ?? "profissional";
+  const firstName = getFirstName(session?.user.email);
+  const nextPriority = nextAppointments[0];
 
   return (
-    <div className="stack-lg">
-      <div className="dashboard-hero">
-        <div className="stack-sm">
+    <div className="stack-xl">
+      <section className="dashboard-hero">
+        <div className="dashboard-hero__content stack-md">
           <div className="eyebrow">{todayLabel}</div>
-          <h1>
-            {getGreeting()}, {firstName}
-          </h1>
-          <p>Resumo diário da operação de consultas pagas, com foco no que precisa de ação agora.</p>
+          <div className="stack-sm">
+            <h1>
+              {getGreeting()}, {firstName}
+            </h1>
+            <p>
+              A operação do dia está organizada em uma visão mais objetiva, com foco em agenda,
+              pagamento e execução sem ruído visual.
+            </p>
+          </div>
+
+          <div className="hero-tags">
+            <span className="hero-tag">Agenda profissional</span>
+            <span className="hero-tag">Financeiro visível</span>
+            <span className="hero-tag">Fluxo clínico organizado</span>
+          </div>
         </div>
 
-        <div className="dashboard-hero__actions">
-          <Link className="button" to="/consultations/new">
-            Criar consulta
-          </Link>
-          <Link className="button button--secondary" to="/consultations">
-            Ver consultas
-          </Link>
+        <div className="dashboard-hero__panel">
+          <span className="summary-label">Foco imediato</span>
+          <strong>
+            {nextPriority
+              ? `${nextPriority.client?.name ?? "Cliente"} às ${formatTime(
+                  nextPriority.appointment.start_time
+                )}`
+              : "Agenda sem urgências"}
+          </strong>
+          <p>
+            {nextPriority
+              ? `${nextPriority.service?.name ?? "Consulta"} em ${formatLongDate(
+                  nextPriority.appointment.start_time
+                )}`
+              : "Nenhum atendimento futuro exige atenção imediata."}
+          </p>
+
+          <div className="dashboard-hero__panel-actions">
+            <Link className="button" to="/consultations/new">
+              Nova consulta
+            </Link>
+            <Link className="button button--secondary" to="/consultations">
+              Abrir agenda completa
+            </Link>
+          </div>
         </div>
-      </div>
+      </section>
 
       <div className="stats-grid stats-grid--five">
-        <StatCard label="Consultas hoje" value={state.todayItems.length} />
-        <StatCard label="Pagamentos pendentes" value={pendingPayments.length} />
-        <StatCard label="Online hoje" value={onlineToday} />
-        <StatCard label="Presenciais hoje" value={inPersonToday} />
         <StatCard
-          helper="aprovada hoje"
-          label="Receita confirmada"
+          helper="compromissos ativos na agenda"
+          label="Consultas hoje"
+          tone="info"
+          value={state.todayItems.length}
+        />
+        <StatCard
+          helper="precisam de confirmação financeira"
+          label="Pagamentos pendentes"
+          tone="warning"
+          value={pendingPayments.length}
+        />
+        <StatCard helper="atendimentos virtuais do dia" label="Online hoje" value={onlineToday} />
+        <StatCard
+          helper="atendimentos em consultório"
+          label="Presenciais hoje"
+          value={inPersonToday}
+        />
+        <StatCard
+          helper="valor confirmado para hoje"
+          label="Receita aprovada"
+          tone="success"
           value={formatCurrency(confirmedRevenueToday)}
         />
       </div>
 
       <div className="dashboard-grid">
-        <section className="card stack-md">
+        <section className="card card--highlight stack-md">
           <div className="section-heading">
             <div>
-              <h2>Próximas consultas</h2>
-              <p>Os próximos atendimentos que merecem atenção imediata.</p>
+              <h2>Próximos atendimentos</h2>
+              <p>Os compromissos mais próximos, com leitura rápida e prioridade visual correta.</p>
             </div>
             <Link className="text-link" to="/consultations">
-              Abrir lista completa
+              Ver agenda completa
             </Link>
           </div>
 
@@ -158,32 +212,37 @@ export function DashboardPage() {
             <div className="list-grid">
               {nextAppointments.map((item) => (
                 <Link
-                  className="list-card"
+                  className="list-card list-card--premium"
                   key={item.appointment.id}
                   to={`/consultations/${item.appointment.id}`}
                 >
                   <div className="list-card__top">
-                    <strong>{item.client?.name ?? "Cliente"}</strong>
+                    <div className="stack-xs">
+                      <strong>{item.client?.name ?? "Cliente"}</strong>
+                      <span className="list-card__meta">
+                        {item.service?.name ?? "Serviço"} · {formatDateTime(item.appointment.start_time)}
+                      </span>
+                    </div>
+                    <StatusBadge
+                      label={item.appointment.delivery_mode ?? "nao informado"}
+                      tone={deliveryModeTone(item.appointment.delivery_mode)}
+                      variant="delivery-mode"
+                    />
+                  </div>
+
+                  <div className="list-card__footer">
                     <div className="badge-row">
                       <StatusBadge
-                        label={item.payment?.status ?? "sem pagamento"}
+                        label={item.payment?.status ?? "pending"}
                         tone={paymentStatusTone(item.payment?.status)}
+                        variant="payment-status"
                       />
                       <StatusBadge
-                        label={item.appointment.delivery_mode ?? "sem modo"}
-                        tone={deliveryModeTone(item.appointment.delivery_mode)}
+                        label={item.appointment.status}
+                        tone={appointmentStatusTone(item.appointment.status)}
+                        variant="appointment-status"
                       />
                     </div>
-                  </div>
-                  <div className="list-card__meta">
-                    <span>{item.service?.name ?? "Serviço"}</span>
-                    <span>{formatDateTime(item.appointment.start_time)}</span>
-                  </div>
-                  <div className="list-card__footer">
-                    <StatusBadge
-                      label={item.appointment.status}
-                      tone={appointmentStatusTone(item.appointment.status)}
-                    />
                     <span>{formatCurrency(item.payment?.amount ?? item.appointment.final_price)}</span>
                   </div>
                 </Link>
@@ -196,16 +255,16 @@ export function DashboardPage() {
           <section className="card stack-md">
             <div className="section-heading">
               <div>
-                <h2>Pendências operacionais</h2>
-                <p>O que precisa de atenção para a operação fluir sem fricção.</p>
+                <h2>Pontos de atenção</h2>
+                <p>Indicadores operacionais que merecem acompanhamento ao longo do dia.</p>
               </div>
             </div>
 
             <div className="ops-list">
               <div className="ops-item">
                 <div>
-                  <strong>Pagamentos pendentes</strong>
-                  <p>{pendingPayments.length} consulta(s) aguardando confirmação.</p>
+                  <strong>Confirmações financeiras</strong>
+                  <p>{pendingPayments.length} consulta(s) aguardando avanço no pagamento.</p>
                 </div>
                 <StatusBadge
                   label={String(pendingPayments.length)}
@@ -215,11 +274,11 @@ export function DashboardPage() {
 
               <div className="ops-item">
                 <div>
-                  <strong>Online sem Google conectado</strong>
+                  <strong>Integração com Google</strong>
                   <p>
                     {state.googleStatus.connected
-                      ? "Integração Google conectada."
-                      : `${onlineWithoutGoogle} consulta(s) online sem liberação automática de Meet.`}
+                      ? "Integração conectada e pronta para liberar reuniões online."
+                      : `${onlineWithoutGoogle} consulta(s) online sem automatização de reunião.`}
                   </p>
                 </div>
                 <StatusBadge
@@ -230,8 +289,8 @@ export function DashboardPage() {
 
               <div className="ops-item">
                 <div>
-                  <strong>Refund decisions pendentes</strong>
-                  <p>{state.refundDecisions.length} decisão(ões) aguardando processamento.</p>
+                  <strong>Estornos em análise</strong>
+                  <p>{state.refundDecisions.length} decisão(ões) aguardando tratamento.</p>
                 </div>
                 <StatusBadge
                   label={String(state.refundDecisions.length)}
@@ -244,23 +303,23 @@ export function DashboardPage() {
           <section className="card stack-md">
             <div className="section-heading">
               <div>
-                <h2>Quick actions</h2>
-                <p>Atalhos para as tarefas mais recorrentes.</p>
+                <h2>Atalhos essenciais</h2>
+                <p>Ações frequentes com acabamento mais limpo e direto.</p>
               </div>
             </div>
 
             <div className="quick-actions">
               <Link className="quick-action" to="/consultations/new">
-                <strong>Criar consulta</strong>
-                <span>Iniciar o fluxo pago com compartilhamento.</span>
+                <strong>Registrar nova consulta</strong>
+                <span>Inicie o fluxo de agendamento, cobrança e compartilhamento.</span>
               </Link>
               <Link className="quick-action" to="/consultations">
-                <strong>Consultar operação</strong>
-                <span>Filtrar status, copiar link e sincronizar Google.</span>
+                <strong>Revisar agenda</strong>
+                <span>Filtre clientes, acompanhe status e concentre as ações por consulta.</span>
               </Link>
               <Link className="quick-action" to="/finance">
-                <strong>Ir para financeiro</strong>
-                <span>Revisar pagamentos pendentes e receita.</span>
+                <strong>Acompanhar financeiro</strong>
+                <span>Abra a área de pagamentos, repasses e pendências financeiras.</span>
               </Link>
             </div>
           </section>
@@ -270,11 +329,11 @@ export function DashboardPage() {
       <section className="card stack-md">
         <div className="section-heading">
           <div>
-            <h2>Consultas hoje</h2>
-            <p>Painel compacto do dia com pagamento, status e modo de atendimento.</p>
+            <h2>Agenda do dia</h2>
+            <p>Leitura rápida dos atendimentos de hoje, sem aparência de tabela antiga.</p>
           </div>
           <StatusBadge
-            label={`${cancelledOrNoShow} canceladas / no-show`}
+            label={`${cancelledOrNoShow} ocorrencias`}
             tone={cancelledOrNoShow > 0 ? "danger" : "neutral"}
           />
         </div>
@@ -282,49 +341,48 @@ export function DashboardPage() {
         {state.todayItems.length === 0 ? (
           <div className="empty-state">Nenhuma consulta programada para hoje.</div>
         ) : (
-          <div className="table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Hora</th>
-                  <th>Cliente</th>
-                  <th>Serviço</th>
-                  <th>Modo</th>
-                  <th>Status</th>
-                  <th>Pagamento</th>
-                </tr>
-              </thead>
-              <tbody>
-                {state.todayItems.map((item) => (
-                  <tr key={item.appointment.id}>
-                    <td>{formatTime(item.appointment.start_time)}</td>
-                    <td>{item.client?.name ?? "Cliente"}</td>
-                    <td>{item.service?.name ?? "Serviço"}</td>
-                    <td>
-                      <StatusBadge
-                        label={item.appointment.delivery_mode ?? "sem modo"}
-                        tone={deliveryModeTone(item.appointment.delivery_mode)}
-                      />
-                    </td>
-                    <td>
-                      <StatusBadge
-                        label={item.appointment.status}
-                        tone={appointmentStatusTone(item.appointment.status)}
-                      />
-                    </td>
-                    <td>
-                      <div className="stack-xs">
-                        <StatusBadge
-                          label={item.payment?.status ?? "sem pagamento"}
-                          tone={paymentStatusTone(item.payment?.status)}
-                        />
-                        <span>{formatCurrency(item.payment?.amount ?? item.appointment.final_price)}</span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="agenda-grid">
+            {state.todayItems.map((item) => (
+              <Link
+                className="agenda-card"
+                key={item.appointment.id}
+                to={`/consultations/${item.appointment.id}`}
+              >
+                <div className="agenda-card__time">
+                  <span>{formatTime(item.appointment.start_time)}</span>
+                  <small>{formatLongDate(item.appointment.start_time)}</small>
+                </div>
+
+                <div className="agenda-card__content">
+                  <div className="stack-xs">
+                    <strong>{item.client?.name ?? "Cliente"}</strong>
+                    <span className="list-card__meta">{item.service?.name ?? "Serviço"}</span>
+                  </div>
+
+                  <div className="agenda-card__badges">
+                    <StatusBadge
+                      label={item.appointment.delivery_mode ?? "nao informado"}
+                      tone={deliveryModeTone(item.appointment.delivery_mode)}
+                      variant="delivery-mode"
+                    />
+                    <StatusBadge
+                      label={item.appointment.status}
+                      tone={appointmentStatusTone(item.appointment.status)}
+                      variant="appointment-status"
+                    />
+                    <StatusBadge
+                      label={item.payment?.status ?? "pending"}
+                      tone={paymentStatusTone(item.payment?.status)}
+                      variant="payment-status"
+                    />
+                  </div>
+                </div>
+
+                <div className="agenda-card__value">
+                  {formatCurrency(item.payment?.amount ?? item.appointment.final_price)}
+                </div>
+              </Link>
+            ))}
           </div>
         )}
       </section>

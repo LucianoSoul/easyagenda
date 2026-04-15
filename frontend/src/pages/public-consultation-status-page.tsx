@@ -10,6 +10,7 @@ import {
 import { api } from "../services/api";
 import type { ConsultationPublicStatus } from "../types/api";
 import { formatCurrency, formatDateTime } from "../utils/format";
+import { getLabelForValue } from "../utils/ui-labels";
 
 export function PublicConsultationStatusPage() {
   const { id } = useParams();
@@ -56,7 +57,7 @@ export function PublicConsultationStatusPage() {
 
     if (data.paymentStatus === "approved" && data.deliveryMode === "in_person") {
       return {
-        label: "Ver dados de comparecimento",
+        label: "Ver orientações de comparecimento",
         href: "#attendance"
       };
     }
@@ -71,7 +72,7 @@ export function PublicConsultationStatusPage() {
           <div className="brand__mark">EA</div>
           <div>
             <div className="brand__title">Easy Agenda</div>
-            <div className="brand__subtitle public-subtitle">Status da sua consulta</div>
+            <div className="brand__subtitle public-subtitle">Acompanhamento da consulta</div>
           </div>
         </div>
 
@@ -86,14 +87,17 @@ export function PublicConsultationStatusPage() {
           <StatusBadge
             label={data.appointmentStatus}
             tone={appointmentStatusTone(data.appointmentStatus)}
+            variant="appointment-status"
           />
           <StatusBadge
-            label={data.paymentStatus ?? "sem pagamento"}
+            label={data.paymentStatus ?? "pending"}
             tone={paymentStatusTone(data.paymentStatus)}
+            variant="payment-status"
           />
           <StatusBadge
-            label={data.deliveryMode ?? "sem modo"}
+            label={data.deliveryMode ?? "nao informado"}
             tone={deliveryModeTone(data.deliveryMode)}
+            variant="delivery-mode"
           />
         </div>
 
@@ -111,8 +115,8 @@ export function PublicConsultationStatusPage() {
             <strong>{formatCurrency(data.payment?.amount)}</strong>
           </div>
           <div>
-            <span className="summary-label">Pagamento</span>
-            <strong>{data.payment?.method ?? "Aguardando"}</strong>
+            <span className="summary-label">Forma de pagamento</span>
+            <strong>{getLabelForValue(data.payment?.method, "payment-method")}</strong>
           </div>
         </div>
 
@@ -129,19 +133,19 @@ export function PublicConsultationStatusPage() {
 
         {data.paymentStatus !== "approved" ? (
           <div className="note-box">
-            O link da reunião online só é liberado após a confirmação do pagamento.
+            O acesso à reunião online é liberado somente após a confirmação do pagamento.
           </div>
         ) : null}
 
         {data.payment?.qrCode ? (
           <div className="note-box">
-            <span className="summary-label">QR Code</span>
+            <span className="summary-label">Código para pagamento</span>
             <p>{data.payment.qrCode}</p>
           </div>
         ) : null}
 
         <section className="public-section" id="attendance">
-          <h2>Detalhes do atendimento</h2>
+          <h2>Orientações do atendimento</h2>
           {data.deliveryMode === "online" ? (
             data.meeting ? (
               <div className="meeting-box">
@@ -156,8 +160,8 @@ export function PublicConsultationStatusPage() {
               </div>
             ) : (
               <div className="empty-state">
-                O link da reunião ainda não está disponível. Ele será liberado automaticamente
-                assim que estiver pronto.
+                O link ainda não está disponível. Ele será liberado automaticamente assim que o
+                fluxo estiver pronto.
               </div>
             )
           ) : (
@@ -169,7 +173,7 @@ export function PublicConsultationStatusPage() {
         </section>
 
         <Link className="text-link" to="/login">
-          Sou profissional
+          Acessar área profissional
         </Link>
       </section>
     </div>

@@ -1,3 +1,5 @@
+import { getLabelForValue, type LabelVariant } from "../utils/ui-labels";
+
 type StatusBadgeProps = {
   label: string;
   tone:
@@ -8,10 +10,11 @@ type StatusBadgeProps = {
     | "info"
     | "online"
     | "inperson";
+  variant?: LabelVariant;
 };
 
-export function StatusBadge({ label, tone }: StatusBadgeProps) {
-  return <span className={`badge badge--${tone}`}>{label}</span>;
+export function StatusBadge({ label, tone, variant = "generic" }: StatusBadgeProps) {
+  return <span className={`badge badge--${tone}`}>{getLabelForValue(label, variant)}</span>;
 }
 
 export function appointmentStatusTone(status: string) {

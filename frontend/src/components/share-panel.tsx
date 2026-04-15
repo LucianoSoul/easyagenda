@@ -1,6 +1,11 @@
 import { useMemo, useState } from "react";
+import {
+  buildPublicConsultationPath,
+  buildPublicConsultationUrl
+} from "../config/runtime";
 import type { ConsultationCreateResult } from "../types/api";
 import { copyToClipboard } from "../utils/format";
+import { getLabelForValue } from "../utils/ui-labels";
 
 export function SharePanel({
   result
@@ -8,13 +13,15 @@ export function SharePanel({
   result: ConsultationCreateResult;
 }) {
   const [feedback, setFeedback] = useState<string | null>(null);
-  const publicBaseUrl = import.meta.env.VITE_PUBLIC_APP_BASE_URL;
+  const hasConfiguredPublicBaseUrl = Boolean(import.meta.env.VITE_PUBLIC_APP_BASE_URL?.trim());
 
   const publicUrl = useMemo(() => {
-    if (!publicBaseUrl) return null;
-    return new URL(`/public/consultations/${result.sharePayload.consultationId}`, publicBaseUrl).toString();
-  }, [publicBaseUrl, result.sharePayload.consultationId]);
-  const publicPath = `/public/consultations/${result.sharePayload.consultationId}`;
+    return buildPublicConsultationUrl(result.sharePayload.consultationId);
+  }, [result.sharePayload.consultationId]);
+
+  const publicPath = useMemo(() => {
+    return buildPublicConsultationPath(result.sharePayload.consultationId);
+  }, [result.sharePayload.consultationId]);
 
   async function handleCopy(label: string, value: string) {
     await copyToClipboard(value);
@@ -27,18 +34,22 @@ export function SharePanel({
       <div className="section-heading">
         <div>
           <h2>Compartilhamento</h2>
-          <p>Use o texto pronto para WhatsApp ou e-mail logo após criar a consulta.</p>
+          <p>Use os conteúdos prontos para enviar a confirmação da consulta por WhatsApp ou e-mail.</p>
         </div>
       </div>
 
       <div className="summary-grid">
         <div>
-          <span className="summary-label">URL pública</span>
+          <span className="summary-label">Endereço público</span>
+          <strong>{publicUrl}</strong>
+        </div>
+        <div>
+          <span className="summary-label">Caminho interno</span>
           <strong>{publicPath}</strong>
         </div>
         <div>
-          <span className="summary-label">Pagamento</span>
-          <strong>{result.sharePayload.paymentStatus}</strong>
+          <span className="summary-label">Situação do pagamento</span>
+          <strong>{getLabelForValue(result.sharePayload.paymentStatus, "payment-status")}</strong>
         </div>
       </div>
 
@@ -48,39 +59,39 @@ export function SharePanel({
           type="button"
           onClick={() => handleCopy("Texto do WhatsApp", result.sharePayload.whatsappText)}
         >
-          Copiar WhatsApp
+          Copiar texto do WhatsApp
         </button>
         <button
           className="button button--secondary"
           type="button"
           onClick={() => handleCopy("Corpo do e-mail", result.sharePayload.emailBody)}
         >
-          Copiar e-mail
+          Copiar corpo do e-mail
         </button>
         <button
           className="button button--ghost"
           type="button"
-          disabled={!publicUrl}
-          onClick={() => publicUrl && window.open(publicUrl, "_blank", "noopener,noreferrer")}
+          onClick={() => window.open(publicUrl, "_blank", "noopener,noreferrer")}
         >
-          Abrir status público
+          Abrir página pública
         </button>
       </div>
 
       <label className="field">
-        <span>WhatsApp</span>
+        <span>Mensagem para WhatsApp</span>
         <textarea readOnly rows={6} value={result.sharePayload.whatsappText} />
       </label>
 
       <label className="field">
-        <span>E-mail</span>
+        <span>Mensagem para e-mail</span>
         <textarea readOnly rows={8} value={result.sharePayload.emailBody} />
       </label>
 
       {feedback ? <div className="helper-text">{feedback}</div> : null}
-      {!publicUrl ? (
+      {!hasConfiguredPublicBaseUrl ? (
         <div className="helper-text">
-          Configure <code>VITE_PUBLIC_APP_BASE_URL</code> para abrir o link completo.
+          Em desenvolvimento, o link usa a origem atual. Em produção, configure{" "}
+          <code>VITE_PUBLIC_APP_BASE_URL</code> com o domínio oficial da aplicação.
         </div>
       ) : null}
     </section>
