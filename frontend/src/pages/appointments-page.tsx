@@ -9,6 +9,7 @@ import { api } from "../services/api";
 import type { AgendaItem } from "../types/api";
 import { copyToClipboard, formatCurrency, formatDate, toLocalDateInput } from "../utils/format";
 import { getLabelForValue, getSearchableText } from "../utils/ui-labels";
+import "../styles/appointments-premium.css";
 
 type FeedbackState = {
   type: "success" | "error";
@@ -206,57 +207,59 @@ export function AppointmentsPage() {
   }
 
   if (!token) return null;
-  if (error) return <div className="alert alert--error">{error}</div>;
+  if (error) return <div className="ea-appointments-feedback ea-appointments-feedback--error">{error}</div>;
   if (!items) return <LoadingBlock label="Carregando consultas..." />;
 
   return (
-    <div className="stack-xl">
-      <section className="appointments-stage">
-        <div className="appointments-stage__hero">
-          <div className="eyebrow">Centro operacional</div>
-          <h1>Consultas</h1>
-          <p>
-            A agenda diaria agora aparece como uma lista premium, com leitura rapida, contexto claro
-            e acoes discretas por consulta.
+    <div className="ea-appointments-page">
+      <section className="ea-appointments-stage">
+        <div className="ea-appointments-stage__copy">
+          <div className="ea-appointments-stage__eyebrow">Centro operacional</div>
+          <h1 className="ea-appointments-stage__title">Consultas</h1>
+          <p className="ea-appointments-stage__description">
+            Uma lista clara, direta e premium para trabalhar o dia inteiro sem cara de tabela antiga.
           </p>
         </div>
 
-        <div className="appointments-stage__stats">
-          <div className="appointments-stage__stat">
-            <span>Consultas filtradas</span>
-            <strong>{metrics.total}</strong>
+        <div className="ea-appointments-stage__stats">
+          <div className="ea-card-stage-stat">
+            <span className="ea-card-stage-stat__label">Consultas filtradas</span>
+            <strong className="ea-card-stage-stat__value">{metrics.total}</strong>
           </div>
-          <div className="appointments-stage__stat">
-            <span>Pagamentos pendentes</span>
-            <strong>{metrics.pending}</strong>
+          <div className="ea-card-stage-stat">
+            <span className="ea-card-stage-stat__label">Pagamentos pendentes</span>
+            <strong className="ea-card-stage-stat__value">{metrics.pending}</strong>
           </div>
-          <div className="appointments-stage__stat">
-            <span>Valor aprovado</span>
-            <strong>{formatCurrency(metrics.approved)}</strong>
+          <div className="ea-card-stage-stat">
+            <span className="ea-card-stage-stat__label">Valor aprovado</span>
+            <strong className="ea-card-stage-stat__value">{formatCurrency(metrics.approved)}</strong>
           </div>
-          <div className="appointments-stage__stat">
-            <span>Proxima data</span>
-            <strong>{metrics.nextDate ? formatDate(metrics.nextDate) : "Sem agenda"}</strong>
+          <div className="ea-card-stage-stat">
+            <span className="ea-card-stage-stat__label">Proxima data</span>
+            <strong className="ea-card-stage-stat__value">
+              {metrics.nextDate ? formatDate(metrics.nextDate) : "Sem agenda"}
+            </strong>
           </div>
         </div>
       </section>
 
-      <section className="appointments-toolbar">
-        <div className="appointments-toolbar__search">
-          <label className="field appointments-search">
-            <span>Buscar cliente</span>
-            <div className="appointments-search__control">
+      <section className="ea-appointments-toolbar">
+        <div className="ea-appointments-toolbar__search">
+          <label className="ea-appointments-search">
+            <span className="ea-appointments-search__label">Buscar cliente</span>
+            <div className="ea-appointments-search__control">
               <input
+                className="ea-appointments-search__input"
                 placeholder="Digite o nome do cliente"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
 
               {clientSuggestions.length > 0 ? (
-                <div className="appointments-search__suggestions">
+                <div className="ea-appointments-search__suggestions">
                   {clientSuggestions.map((suggestion) => (
                     <button
-                      className="appointments-search__option"
+                      className="ea-appointments-search__option"
                       key={suggestion}
                       onClick={() => setSearch(suggestion)}
                       type="button"
@@ -270,10 +273,14 @@ export function AppointmentsPage() {
           </label>
         </div>
 
-        <div className="appointments-toolbar__filters">
-          <label className="field appointments-filter">
-            <span>Status</span>
-            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+        <div className="ea-appointments-toolbar__filters">
+          <label className="ea-appointments-filter">
+            <span className="ea-appointments-filter__label">Status</span>
+            <select
+              className="ea-appointments-filter__control"
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+            >
               {statusOptions.map((option) => (
                 <option key={option} value={option}>
                   {option === "all" ? "Todos" : getLabelForValue(option, "appointment-status")}
@@ -282,9 +289,13 @@ export function AppointmentsPage() {
             </select>
           </label>
 
-          <label className="field appointments-filter">
-            <span>Modalidade</span>
-            <select value={deliveryFilter} onChange={(event) => setDeliveryFilter(event.target.value)}>
+          <label className="ea-appointments-filter">
+            <span className="ea-appointments-filter__label">Modalidade</span>
+            <select
+              className="ea-appointments-filter__control"
+              value={deliveryFilter}
+              onChange={(event) => setDeliveryFilter(event.target.value)}
+            >
               {deliveryOptions.map((option) => (
                 <option key={option} value={option}>
                   {option === "all" ? "Todas" : getLabelForValue(option, "delivery-mode")}
@@ -293,9 +304,13 @@ export function AppointmentsPage() {
             </select>
           </label>
 
-          <label className="field appointments-filter">
-            <span>Servico</span>
-            <select value={serviceFilter} onChange={(event) => setServiceFilter(event.target.value)}>
+          <label className="ea-appointments-filter">
+            <span className="ea-appointments-filter__label">Servico</span>
+            <select
+              className="ea-appointments-filter__control"
+              value={serviceFilter}
+              onChange={(event) => setServiceFilter(event.target.value)}
+            >
               <option value="all">Todos</option>
               {serviceOptions.map((serviceName) => (
                 <option key={serviceName} value={serviceName}>
@@ -305,29 +320,34 @@ export function AppointmentsPage() {
             </select>
           </label>
 
-          <label className="field appointments-filter">
-            <span>Data</span>
+          <label className="ea-appointments-filter">
+            <span className="ea-appointments-filter__label">Data</span>
             <input
+              className="ea-appointments-filter__control"
               type="date"
               value={dateFilter}
               onChange={(event) => setDateFilter(event.target.value)}
             />
           </label>
 
-          <button className="button button--ghost appointments-toolbar__clear" onClick={clearFilters} type="button">
+          <button className="ea-appointments-toolbar__clear" onClick={clearFilters} type="button">
             Limpar filtros
           </button>
         </div>
       </section>
 
       {feedback ? (
-        <div className={`alert ${feedback.type === "error" ? "alert--error" : ""}`}>
+        <div
+          className={`ea-appointments-feedback${
+            feedback.type === "error" ? " ea-appointments-feedback--error" : ""
+          }`}
+        >
           {feedback.message}
         </div>
       ) : null}
 
       {filteredItems.length === 0 ? (
-        <section className="card empty-state">
+        <section className="ea-appointments-empty">
           Nenhuma consulta encontrada para os filtros aplicados.
         </section>
       ) : (
@@ -340,7 +360,7 @@ export function AppointmentsPage() {
             onGoogleSync={handleGoogleSync}
           />
 
-          <section className="appointment-list-mobile">
+          <section className="ea-appointments-mobile-list">
             {filteredItems.map((item) => (
               <AppointmentCardMobile
                 item={item}
@@ -355,8 +375,8 @@ export function AppointmentsPage() {
         </>
       )}
 
-      <div className="appointments-toolbar__footer">
-        <Link className="button" to="/consultations/new">
+      <div className="ea-appointments-toolbar__footer">
+        <Link className="ea-appointments-stage__cta" to="/consultations/new">
           Nova consulta
         </Link>
       </div>

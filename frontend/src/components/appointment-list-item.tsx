@@ -24,51 +24,49 @@ export function AppointmentListItem({
   onCancel
 }: AppointmentListItemProps) {
   return (
-    <article className="appointment-list-item">
-      <div className="appointment-list-item__identity">
-        <span className="appointment-list-item__eyebrow">Cliente</span>
-        <strong className="appointment-list-item__name">{item.client?.name ?? "Cliente"}</strong>
+    <article className="ea-card-appointment">
+      <div className="ea-card-appointment__body">
+        <strong className="ea-card-appointment__client">{item.client?.name ?? "Cliente"}</strong>
+
         <ServiceSummary
           attendanceMode={item.appointment.delivery_mode}
-          className="appointment-list-item__summary"
+          className="ea-card-appointment__summary"
           serviceName={item.service?.name}
           variant="compact"
         />
-      </div>
 
-      <div className="appointment-list-item__schedule">
-        <span className="appointment-list-item__eyebrow">Horario</span>
-        <strong className="appointment-list-item__date">{formatDate(item.appointment.start_time)}</strong>
-        <span className="appointment-list-item__time">as {formatTime(item.appointment.start_time)}</span>
-      </div>
-
-      <div className="appointment-list-item__status">
-        <span className="appointment-list-item__eyebrow">Status</span>
-        <div className="appointment-list-item__status-row">
-        <StatusBadge
-          label={item.payment?.status ?? "pending"}
-          tone={paymentStatusTone(item.payment?.status)}
-          variant="payment-status"
-        />
-        <StatusBadge
-          label={item.appointment.status}
-          tone={appointmentStatusTone(item.appointment.status)}
-          variant="appointment-status"
-        />
+        <div className="ea-card-appointment__schedule">
+          <span className="ea-card-appointment__schedule-icon">📅</span>
+          <span className="ea-card-appointment__schedule-text">
+            {formatDate(item.appointment.start_time)} as {formatTime(item.appointment.start_time)}
+          </span>
         </div>
-      </div>
 
-      <div className="appointment-list-item__aside">
-        <strong className="appointment-list-item__amount">
-          {formatCurrency(item.payment?.amount ?? item.appointment.final_price)}
-        </strong>
-        <AppointmentActionsMenu
-          item={item}
-          onCancel={onCancel}
-          onCopyLink={onCopyLink}
-          onCopyWhatsApp={onCopyWhatsApp}
-          onGoogleSync={onGoogleSync}
-        />
+        <div className="ea-card-appointment__badges">
+          <StatusBadge
+            label={item.payment?.status ?? "pending"}
+            tone={paymentStatusTone(item.payment?.status)}
+            variant="payment-status"
+          />
+          <StatusBadge
+            label={item.appointment.status}
+            tone={appointmentStatusTone(item.appointment.status)}
+            variant="appointment-status"
+          />
+        </div>
+
+        <div className="ea-card-appointment__footer">
+          <strong className="ea-card-appointment__value">
+            {formatCurrency(item.payment?.amount ?? item.appointment.final_price)}
+          </strong>
+          <AppointmentActionsMenu
+            item={item}
+            onCancel={onCancel}
+            onCopyLink={onCopyLink}
+            onCopyWhatsApp={onCopyWhatsApp}
+            onGoogleSync={onGoogleSync}
+          />
+        </div>
       </div>
     </article>
   );
