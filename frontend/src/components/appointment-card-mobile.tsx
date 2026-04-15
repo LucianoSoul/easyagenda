@@ -26,8 +26,9 @@ export function AppointmentCardMobile({
   return (
     <article className="appointment-card-mobile">
       <div className="appointment-card-mobile__top">
-        <div className="stack-xs">
-          <strong>{item.client?.name ?? "Cliente"}</strong>
+        <div className="appointment-card-mobile__identity">
+          <span className="appointment-card-mobile__eyebrow">Cliente</span>
+          <strong className="appointment-card-mobile__name">{item.client?.name ?? "Cliente"}</strong>
           <ServiceSummary
             attendanceMode={item.appointment.delivery_mode}
             className="appointment-card-mobile__summary"
@@ -46,16 +47,18 @@ export function AppointmentCardMobile({
       </div>
 
       <div className="appointment-card-mobile__meta">
-        <div>
-          <span className="summary-label">Horario</span>
-          <strong>
+        <div className="appointment-card-mobile__meta-block">
+          <span className="appointment-card-mobile__eyebrow">Horario</span>
+          <strong className="appointment-card-mobile__date">
             {formatDate(item.appointment.start_time)} as {formatTime(item.appointment.start_time)}
           </strong>
         </div>
 
-        <div>
-          <span className="summary-label">Valor</span>
-          <strong>{formatCurrency(item.payment?.amount ?? item.appointment.final_price)}</strong>
+        <div className="appointment-card-mobile__meta-block">
+          <span className="appointment-card-mobile__eyebrow">Valor</span>
+          <strong className="appointment-card-mobile__amount">
+            {formatCurrency(item.payment?.amount ?? item.appointment.final_price)}
+          </strong>
         </div>
       </div>
 

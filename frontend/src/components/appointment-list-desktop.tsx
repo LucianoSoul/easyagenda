@@ -19,10 +19,10 @@ export function AppointmentListDesktop({
   return (
     <section className="appointment-list-desktop">
       <div className="appointment-list-desktop__head">
-        <span>Cliente e contexto</span>
-        <span>Data e horario</span>
-        <span>Status</span>
-        <span>Valor e acoes</span>
+        <span className="appointment-list-desktop__head-label">Cliente e contexto</span>
+        <span className="appointment-list-desktop__head-label">Data e horario</span>
+        <span className="appointment-list-desktop__head-label">Status</span>
+        <span className="appointment-list-desktop__head-label">Valor e acoes</span>
       </div>
 
       <div className="appointment-list-desktop__body">

@@ -21,6 +21,7 @@ export function AppointmentActionsMenu({
 
   return (
     <OverflowMenu
+      className="appointment-actions-menu"
       actions={[
         {
           label: "Ver detalhes",

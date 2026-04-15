@@ -31,5 +31,9 @@ export function ServiceSummary({
           formatCurrency(price)
         ];
 
-  return <span className={className}>{joinPresentationParts(parts)}</span>;
+  const nextClassName = ["service-summary", `service-summary--${variant}`, className]
+    .filter(Boolean)
+    .join(" ");
+
+  return <span className={nextClassName}>{joinPresentationParts(parts)}</span>;
 }

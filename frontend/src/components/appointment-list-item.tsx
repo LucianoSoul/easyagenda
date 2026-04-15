@@ -26,7 +26,8 @@ export function AppointmentListItem({
   return (
     <article className="appointment-list-item">
       <div className="appointment-list-item__identity">
-        <strong>{item.client?.name ?? "Cliente"}</strong>
+        <span className="appointment-list-item__eyebrow">Cliente</span>
+        <strong className="appointment-list-item__name">{item.client?.name ?? "Cliente"}</strong>
         <ServiceSummary
           attendanceMode={item.appointment.delivery_mode}
           className="appointment-list-item__summary"
@@ -36,11 +37,14 @@ export function AppointmentListItem({
       </div>
 
       <div className="appointment-list-item__schedule">
-        <strong>{formatDate(item.appointment.start_time)}</strong>
-        <span>as {formatTime(item.appointment.start_time)}</span>
+        <span className="appointment-list-item__eyebrow">Horario</span>
+        <strong className="appointment-list-item__date">{formatDate(item.appointment.start_time)}</strong>
+        <span className="appointment-list-item__time">as {formatTime(item.appointment.start_time)}</span>
       </div>
 
       <div className="appointment-list-item__status">
+        <span className="appointment-list-item__eyebrow">Status</span>
+        <div className="appointment-list-item__status-row">
         <StatusBadge
           label={item.payment?.status ?? "pending"}
           tone={paymentStatusTone(item.payment?.status)}
@@ -51,6 +55,7 @@ export function AppointmentListItem({
           tone={appointmentStatusTone(item.appointment.status)}
           variant="appointment-status"
         />
+        </div>
       </div>
 
       <div className="appointment-list-item__aside">

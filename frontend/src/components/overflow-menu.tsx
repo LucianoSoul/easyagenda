@@ -6,13 +6,15 @@ type OverflowAction = {
 
 export function OverflowMenu({
   actions,
-  label = "Acoes"
+  label = "Acoes",
+  className = ""
 }: {
   actions: OverflowAction[];
   label?: string;
+  className?: string;
 }) {
   return (
-    <details className="overflow-menu">
+    <details className={["overflow-menu", className].filter(Boolean).join(" ")}>
       <summary aria-label={label} className="overflow-menu__trigger">
         {"\u22EE"}
       </summary>
