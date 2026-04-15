@@ -1,7 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/auth";
-import { buildPublicConsultationUrl } from "../config/runtime";
+import { OverflowMenu } from "../components/overflow-menu";
 import { LoadingBlock } from "../components/loading-block";
 import {
   StatusBadge,
@@ -9,9 +9,17 @@ import {
   deliveryModeTone,
   paymentStatusTone
 } from "../components/status-badge";
+import { buildPublicConsultationUrl } from "../config/runtime";
 import { api } from "../services/api";
 import type { AgendaItem } from "../types/api";
-import { copyToClipboard, formatCurrency, formatDate, formatDateTime, formatTime, toLocalDateInput } from "../utils/format";
+import {
+  copyToClipboard,
+  formatCurrency,
+  formatDate,
+  formatTime,
+  toLocalDateInput
+} from "../utils/format";
+import { joinPresentationParts } from "../utils/presentation";
 import { getLabelForValue, getSearchableText } from "../utils/ui-labels";
 
 type FeedbackState = {
@@ -22,60 +30,15 @@ type FeedbackState = {
 const statusOptions = ["all", "pending_payment", "confirmed", "cancelled", "no_show"];
 const deliveryOptions = ["all", "online", "in_person"];
 
-function AppointmentActionMenu({
-  item,
-  onCancel,
-  onCopyLink,
-  onCopyWhatsApp,
-  onGoogleSync
-}: {
-  item: AgendaItem;
-  onCancel: (appointmentId: string) => void;
-  onCopyLink: (appointmentId: string) => void;
-  onCopyWhatsApp: (appointmentId: string) => void;
-  onGoogleSync: (appointmentId: string) => void;
-}) {
-  return (
-    <details className="action-menu">
-      <summary className="action-menu__trigger">Ações</summary>
-      <div className="action-menu__panel">
-        <Link className="action-menu__item" to={`/consultations/${item.appointment.id}`}>
-          Abrir detalhes
-        </Link>
-        <button
-          className="action-menu__item"
-          onClick={() => onCopyLink(item.appointment.id)}
-          type="button"
-        >
-          Copiar link público
-        </button>
-        <button
-          className="action-menu__item"
-          onClick={() => onCopyWhatsApp(item.appointment.id)}
-          type="button"
-        >
-          Copiar mensagem
-        </button>
-        <button
-          className="action-menu__item"
-          onClick={() => onGoogleSync(item.appointment.id)}
-          type="button"
-        >
-          Sincronizar agenda
-        </button>
-        <button
-          className="action-menu__item action-menu__item--danger"
-          onClick={() => onCancel(item.appointment.id)}
-          type="button"
-        >
-          Cancelar consulta
-        </button>
-      </div>
-    </details>
-  );
+function formatEntrySummary(item: AgendaItem) {
+  return joinPresentationParts([
+    item.service?.name ?? "Serviço não informado",
+    getLabelForValue(item.appointment.delivery_mode, "delivery-mode")
+  ]);
 }
 
 export function AppointmentsPage() {
+  const navigate = useNavigate();
   const { token } = useAuth();
   const [items, setItems] = useState<AgendaItem[] | null>(null);
   const [search, setSearch] = useState("");
@@ -161,13 +124,17 @@ export function AppointmentsPage() {
   const metrics = useMemo(() => {
     const total = filteredItems.length;
     const pending = filteredItems.filter((item) => item.payment?.status === "pending").length;
-    const online = filteredItems.filter((item) => item.appointment.delivery_mode === "online").length;
     const approved = filteredItems.reduce((totalValue, item) => {
       if (item.payment?.status !== "approved") return totalValue;
       return totalValue + (item.payment.amount ?? 0);
     }, 0);
 
-    return { total, pending, online, approved };
+    return {
+      total,
+      pending,
+      approved,
+      nextDate: filteredItems[0]?.appointment.start_time ?? null
+    };
   }, [filteredItems]);
 
   function clearFilters() {
@@ -264,57 +231,41 @@ export function AppointmentsPage() {
 
   return (
     <div className="stack-xl">
-      <section className="page-hero page-hero--consultations">
-        <div className="stack-sm">
-          <div className="eyebrow">Agenda operacional</div>
+      <section className="consultations-hero">
+        <div className="consultations-hero__copy">
+          <div className="eyebrow">Central operacional</div>
           <h1>Consultas</h1>
           <p>
-            Uma visão mais sofisticada para buscar clientes, filtrar agenda e executar ações sem
-            bagunça visual.
+            Uma lista operacional desenhada para leitura rápida, contexto claro e execução diária com
+            aparência de software premium.
           </p>
         </div>
 
-        <div className="page-hero__actions">
-          <Link className="button" to="/consultations/new">
-            Nova consulta
-          </Link>
+        <div className="consultations-hero__summary">
+          <div className="consultations-hero__metric">
+            <span>Consultas filtradas</span>
+            <strong>{metrics.total}</strong>
+          </div>
+          <div className="consultations-hero__metric">
+            <span>Pagamentos pendentes</span>
+            <strong>{metrics.pending}</strong>
+          </div>
+          <div className="consultations-hero__metric">
+            <span>Valor aprovado</span>
+            <strong>{formatCurrency(metrics.approved)}</strong>
+          </div>
+          <div className="consultations-hero__metric">
+            <span>Próxima data</span>
+            <strong>{metrics.nextDate ? formatDate(metrics.nextDate) : "Sem agenda"}</strong>
+          </div>
         </div>
       </section>
 
-      <div className="stats-grid stats-grid--four">
-        <section className="card metric-card">
-          <span className="summary-label">Consultas filtradas</span>
-          <strong>{metrics.total}</strong>
-        </section>
-        <section className="card metric-card">
-          <span className="summary-label">Pendências financeiras</span>
-          <strong>{metrics.pending}</strong>
-        </section>
-        <section className="card metric-card">
-          <span className="summary-label">Atendimentos online</span>
-          <strong>{metrics.online}</strong>
-        </section>
-        <section className="card metric-card">
-          <span className="summary-label">Valor aprovado</span>
-          <strong>{formatCurrency(metrics.approved)}</strong>
-        </section>
-      </div>
-
-      <section className="card card--highlight stack-md">
-        <div className="section-heading">
-          <div>
-            <h2>Busca e filtros</h2>
-            <p>Pesquisa rápida por cliente com apoio visual mais refinado e sugestões ao digitar.</p>
-          </div>
-          <button className="button button--ghost" onClick={clearFilters} type="button">
-            Limpar filtros
-          </button>
-        </div>
-
-        <div className="filters-grid filters-grid--consultations">
-          <label className="field search-field">
+      <section className="consultations-toolbar">
+        <div className="consultations-toolbar__primary">
+          <label className="field search-combobox">
             <span>Buscar cliente</span>
-            <div className="search-field__control">
+            <div className="search-combobox__control">
               <input
                 placeholder="Digite o nome do cliente"
                 value={search}
@@ -322,10 +273,10 @@ export function AppointmentsPage() {
               />
 
               {clientSuggestions.length > 0 ? (
-                <div className="suggestions-panel">
+                <div className="search-combobox__panel">
                   {clientSuggestions.map((suggestion) => (
                     <button
-                      className="suggestions-panel__item"
+                      className="search-combobox__item"
                       key={suggestion}
                       onClick={() => setSearch(suggestion)}
                       type="button"
@@ -337,8 +288,10 @@ export function AppointmentsPage() {
               ) : null}
             </div>
           </label>
+        </div>
 
-          <label className="field">
+        <div className="consultations-toolbar__filters">
+          <label className="field toolbar-field">
             <span>Status</span>
             <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
               {statusOptions.map((option) => (
@@ -349,7 +302,7 @@ export function AppointmentsPage() {
             </select>
           </label>
 
-          <label className="field">
+          <label className="field toolbar-field">
             <span>Modalidade</span>
             <select value={deliveryFilter} onChange={(event) => setDeliveryFilter(event.target.value)}>
               {deliveryOptions.map((option) => (
@@ -360,7 +313,7 @@ export function AppointmentsPage() {
             </select>
           </label>
 
-          <label className="field">
+          <label className="field toolbar-field">
             <span>Serviço</span>
             <select value={serviceFilter} onChange={(event) => setServiceFilter(event.target.value)}>
               <option value="all">Todos</option>
@@ -372,7 +325,7 @@ export function AppointmentsPage() {
             </select>
           </label>
 
-          <label className="field">
+          <label className="field toolbar-field">
             <span>Data</span>
             <input
               type="date"
@@ -380,70 +333,53 @@ export function AppointmentsPage() {
               onChange={(event) => setDateFilter(event.target.value)}
             />
           </label>
-        </div>
 
-        {feedback ? (
-          <div className={`alert ${feedback.type === "error" ? "alert--error" : ""}`}>
-            {feedback.message}
-          </div>
-        ) : null}
+          <button className="button button--ghost toolbar-reset" onClick={clearFilters} type="button">
+            Limpar
+          </button>
+        </div>
       </section>
+
+      {feedback ? (
+        <div className={`alert ${feedback.type === "error" ? "alert--error" : ""}`}>
+          {feedback.message}
+        </div>
+      ) : null}
 
       {filteredItems.length === 0 ? (
         <section className="card empty-state">
           Nenhuma consulta encontrada para os filtros aplicados.
         </section>
       ) : (
-        <div className="consultation-list">
-          {filteredItems.map((item) => (
-            <article className="consultation-card" key={item.appointment.id}>
-              <div className="consultation-card__main">
-                <div className="consultation-card__headline">
+        <section className="consultation-stream">
+          <div className="consultation-stream__head">
+            <span>Cliente e contexto</span>
+            <span>Horário e situação</span>
+            <span>Valor e ações</span>
+          </div>
+
+          <div className="consultation-stream__list">
+            {filteredItems.map((item) => (
+              <article className="consultation-entry" key={item.appointment.id}>
+                <div className="consultation-entry__identity">
                   <div className="stack-xs">
                     <strong>{item.client?.name ?? "Cliente"}</strong>
-                    <span className="consultation-card__datetime">
-                      {formatDate(item.appointment.start_time)} às {formatTime(item.appointment.start_time)}
-                    </span>
+                    <span className="consultation-entry__summary">{formatEntrySummary(item)}</span>
                   </div>
-
-                  <AppointmentActionMenu
-                    item={item}
-                    onCancel={handleCancel}
-                    onCopyLink={handleCopyLink}
-                    onCopyWhatsApp={handleCopyWhatsApp}
-                    onGoogleSync={handleGoogleSync}
-                  />
                 </div>
 
-                <div className="consultation-card__details">
-                  <div className="consultation-card__detail">
-                    <span className="summary-label">Serviço</span>
-                    <strong>{item.service?.name ?? "Serviço não informado"}</strong>
+                <div className="consultation-entry__meta">
+                  <div className="consultation-entry__schedule">
+                    <strong>{formatDate(item.appointment.start_time)}</strong>
+                    <span>às {formatTime(item.appointment.start_time)}</span>
                   </div>
 
-                  <div className="consultation-card__detail">
-                    <span className="summary-label">Modalidade</span>
+                  <div className="consultation-entry__badges">
                     <StatusBadge
-                      label={item.appointment.delivery_mode ?? "nao informado"}
-                      tone={deliveryModeTone(item.appointment.delivery_mode)}
-                      variant="delivery-mode"
+                      label={item.payment?.status ?? "pending"}
+                      tone={paymentStatusTone(item.payment?.status)}
+                      variant="payment-status"
                     />
-                  </div>
-
-                  <div className="consultation-card__detail">
-                    <span className="summary-label">Pagamento</span>
-                    <div className="stack-xs">
-                      <StatusBadge
-                        label={item.payment?.status ?? "pending"}
-                        tone={paymentStatusTone(item.payment?.status)}
-                        variant="payment-status"
-                      />
-                      <strong>{formatCurrency(item.payment?.amount ?? item.appointment.final_price)}</strong>
-                    </div>
-                  </div>
-
-                  <div className="consultation-card__detail">
-                    <span className="summary-label">Situação</span>
                     <StatusBadge
                       label={item.appointment.status}
                       tone={appointmentStatusTone(item.appointment.status)}
@@ -451,11 +387,52 @@ export function AppointmentsPage() {
                     />
                   </div>
                 </div>
-              </div>
-            </article>
-          ))}
-        </div>
+
+                <div className="consultation-entry__actions">
+                  <div className="consultation-entry__amount">
+                    {formatCurrency(item.payment?.amount ?? item.appointment.final_price)}
+                  </div>
+
+                  <OverflowMenu
+                    actions={[
+                      {
+                        label: "Ver detalhes",
+                        onSelect: () => navigate(`/consultations/${item.appointment.id}`)
+                      },
+                      {
+                        label: "Copiar link",
+                        onSelect: () => {
+                          void handleCopyLink(item.appointment.id);
+                        }
+                      },
+                      {
+                        label: "Copiar WhatsApp",
+                        onSelect: () => {
+                          void handleCopyWhatsApp(item.appointment.id);
+                        }
+                      },
+                      {
+                        label: "Sincronizar Google",
+                        onSelect: () => {
+                          void handleGoogleSync(item.appointment.id);
+                        }
+                      },
+                      {
+                        label: "Cancelar consulta",
+                        onSelect: () => {
+                          void handleCancel(item.appointment.id);
+                        },
+                        tone: "danger"
+                      }
+                    ]}
+                  />
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
       )}
+
     </div>
   );
 }

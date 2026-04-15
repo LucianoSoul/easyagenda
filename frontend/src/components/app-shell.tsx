@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/auth";
 
@@ -7,9 +7,10 @@ const navItems = [
   { to: "/consultations", label: "Consultas" },
   { to: "/clients", label: "Clientes" },
   { to: "/services", label: "Serviços" },
-  { to: "/finance", label: "Financeiro" },
-  { to: "/settings", label: "Preferências" }
+  { to: "/finance", label: "Financeiro" }
 ];
+
+const secondaryItems = [{ to: "/settings", label: "Preferências", end: false }];
 
 const mobileNavItems = [
   { to: "/", label: "Início", end: true },
@@ -29,12 +30,23 @@ function getProfessionalLabel(email: string | null | undefined) {
     .join(" ");
 }
 
+function getInitials(label: string) {
+  return label
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0))
+    .join("")
+    .toUpperCase();
+}
+
 export function AppShell() {
   const { logout, session } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const professionalLabel = getProfessionalLabel(session?.user.email);
+  const initials = useMemo(() => getInitials(professionalLabel), [professionalLabel]);
 
   useEffect(() => {
     setIsDrawerOpen(false);
@@ -63,57 +75,71 @@ export function AppShell() {
           onClick={() => setIsDrawerOpen(true)}
           type="button"
         >
-          Menu
+          {initials}
         </button>
       </header>
 
-      <header className="topbar">
-        <div className="topbar__brandline">
-          <div className="brand">
-            <div className="brand__mark">EA</div>
-            <div>
-              <div className="brand__title">Easy Agenda</div>
-              <div className="brand__subtitle topbar__subtitle">
-                Operação clínica com padrão premium
-              </div>
-            </div>
-          </div>
-
-          <div className="topbar__identity">
-            <span className="topbar__identity-label">Profissional</span>
-            <strong>{professionalLabel}</strong>
-            <span className="topbar__identity-meta">{session?.user.email ?? "Sessão ativa"}</span>
+      <header className="masthead">
+        <div className="masthead__brand" onClick={() => navigate("/")}>
+          <div className="brand__mark">EA</div>
+          <div className="masthead__brand-copy">
+            <strong>Easy Agenda</strong>
+            <span>Painel clínico premium</span>
           </div>
         </div>
 
-        <div className="topbar__row">
-          <nav className="topbar__nav" aria-label="Navegação principal">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) =>
-                  `topbar__link${isActive ? " topbar__link--active" : ""}`
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
-
-          <div className="topbar__actions">
-            <button
-              className="button"
-              onClick={() => navigate("/consultations/new")}
-              type="button"
+        <nav className="masthead__nav" aria-label="Navegação principal">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) =>
+                `masthead__link${isActive ? " masthead__link--active" : ""}`
+              }
             >
-              Nova consulta
-            </button>
-            <button className="button button--ghost" onClick={handleLogout} type="button">
-              Encerrar sessão
-            </button>
-          </div>
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="masthead__actions">
+          <button className="button masthead__cta" onClick={() => navigate("/consultations/new")} type="button">
+            Nova consulta
+          </button>
+
+          <details className="avatar-menu">
+            <summary className="avatar-menu__trigger">
+              <span className="avatar-menu__badge">{initials}</span>
+              <span className="avatar-menu__text">
+                <strong>{professionalLabel}</strong>
+                <small>Conta profissional</small>
+              </span>
+            </summary>
+
+            <div className="avatar-menu__panel">
+              <div className="avatar-menu__identity">
+                <span className="summary-label">Sessão ativa</span>
+                <strong>{professionalLabel}</strong>
+                <p>{session?.user.email ?? "Sessão em andamento"}</p>
+              </div>
+
+              {secondaryItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  className="avatar-menu__item"
+                  end={item.end}
+                  to={item.to}
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+
+              <button className="avatar-menu__item avatar-menu__item--danger" onClick={handleLogout} type="button">
+                Encerrar sessão
+              </button>
+            </div>
+          </details>
         </div>
       </header>
 
@@ -149,7 +175,7 @@ export function AppShell() {
         </div>
 
         <nav className="mobile-drawer__nav" aria-label="Navegação mobile">
-          {navItems.map((item) => (
+          {[...navItems, ...secondaryItems].map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -164,16 +190,8 @@ export function AppShell() {
         </nav>
 
         <div className="mobile-drawer__footer">
-          <button
-            className="button button--block"
-            onClick={() => navigate("/consultations/new")}
-            type="button"
-          >
-            Nova consulta
-          </button>
-
           <div className="mobile-drawer__account">
-            <span className="summary-label">Sessão</span>
+            <span className="summary-label">Conta</span>
             <strong>{professionalLabel}</strong>
             <p>{session?.user.email ?? "Sessão ativa"}</p>
           </div>
